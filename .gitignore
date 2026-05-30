@@ -1,0 +1,6 @@
+node_modules/
+.env
+dist/
+server/uploads/quotations/*.pdf
+server/uploads/quotations/*.doc
+.DS_Store
