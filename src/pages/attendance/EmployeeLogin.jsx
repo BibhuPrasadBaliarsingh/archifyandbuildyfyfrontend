@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import toast from 'react-hot-toast';
+import { getErrorMessage } from '../../utils/api';
 import { HardHat, Lock, User, ArrowLeft } from 'lucide-react';
 
 export default function EmployeeLogin() {
@@ -19,7 +20,7 @@ export default function EmployeeLogin() {
       toast.success('Welcome!');
       navigate('/emp');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Login failed. Check your credentials.');
+      toast.error(getErrorMessage(err));
     } finally { setBusy(false); }
   };
 

@@ -16,6 +16,7 @@ import ProjectsList         from './pages/admin/ProjectsList.jsx';
 import ProjectForm          from './pages/admin/ProjectForm.jsx';
 import InvoiceList          from './pages/admin/InvoiceList.jsx';
 import InvoiceForm          from './pages/admin/InvoiceForm.jsx';
+import InvoicePrint         from './pages/admin/InvoicePrint.jsx';
 import StaffsList           from './pages/admin/StaffsList.jsx';
 import StaffEntry           from './pages/admin/StaffEntry.jsx';
 import AttendanceAdmin      from './pages/admin/AttendanceAdmin.jsx';
@@ -64,6 +65,7 @@ export default function App() {
         <Route path="invoices"         element={<InvoiceList />} />
         <Route path="invoices/new"     element={<InvoiceForm />} />
         <Route path="invoices/edit/:id" element={<InvoiceForm />} />
+        <Route path="invoices/print/:id" element={<InvoicePrint />} />
         <Route path="staffs"           element={<StaffsList />} />
         <Route path="staffs/new"       element={<StaffEntry />} />
         <Route path="staffs/edit/:id"  element={<StaffEntry />} />

@@ -10,9 +10,29 @@ export default function LeadsList() {
   const [leads, setLeads] = useState([]);
   const [search, setSearch] = useState('');
   const [busy, setBusy] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [delTarget, setDelTarget] = useState(null);
   const [delBusy, setDelBusy] = useState(false);
   const navigate = useNavigate();
+
+  const downloadExport = async () => {
+    setExporting(true);
+    try {
+      const response = await api.get('/leads/export', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'leads.xls';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error('Export failed');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const load = () => { setBusy(true); api.get('/leads').then(r => setLeads(r.data)).catch(() => toast.error('Failed to load')).finally(() => setBusy(false)); };
   useEffect(load, []);
@@ -52,7 +72,14 @@ export default function LeadsList() {
   return (
     <div>
       <PageHeader title="Leads Management" subtitle={`${filtered.length} lead${filtered.length !== 1 ? 's' : ''}`}
-        actions={<button onClick={() => navigate('/admin/leads/new')} className="btn-primary flex items-center gap-2 text-sm"><Plus className="w-4 h-4" /> Add Lead</button>}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <button onClick={downloadExport} disabled={exporting} className="btn-secondary flex items-center gap-2 text-sm">
+              {exporting ? 'Exporting…' : 'Export Leads'}
+            </button>
+            <button onClick={() => navigate('/admin/leads/new')} className="btn-primary flex items-center gap-2 text-sm"><Plus className="w-4 h-4" /> Add Lead</button>
+          </div>
+        }
       />
       <div className="card">
         <div className="mb-4"><SearchBar value={search} onChange={setSearch} placeholder="Search leads…" /></div>

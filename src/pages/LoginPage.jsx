@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import toast from 'react-hot-toast';
+import { getErrorMessage } from '../utils/api';
 import { Building2, Lock, User, HardHat } from 'lucide-react';
 
 export default function LoginPage() {
@@ -21,7 +22,7 @@ export default function LoginPage() {
       toast.success(`Welcome, ${data.name}!`);
       navigate(role === 'admin' ? '/admin' : '/emp');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Login failed');
+      toast.error(getErrorMessage(err));
     } finally {
       setBusy(false);
     }
@@ -38,8 +39,8 @@ export default function LoginPage() {
       <div className="relative w-full max-w-md">
         {/* Logo / Brand */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white/10 rounded-2xl mb-4 backdrop-blur-sm border border-white/20">
-            <Building2 className="w-10 h-10 text-white" />
+          <div className="inline-flex items-center justify-center w-28 h-28 bg-white/10 rounded-3xl mb-4 backdrop-blur-sm border border-white/20 overflow-hidden">
+            <img src="/logo.png" alt="Archify logo" className="w-20 h-20 object-contain" />
           </div>
           <h1 className="text-3xl font-bold text-white">Archify & Buildify</h1>
           <p className="text-blue-200 mt-1 text-sm">Architecture & Construction Management</p>

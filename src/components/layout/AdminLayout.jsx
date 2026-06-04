@@ -80,8 +80,8 @@ export default function AdminLayout() {
     <aside className="flex flex-col h-full bg-brand-900 w-64 shrink-0">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10">
-        <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center">
-          <Building2 className="w-5 h-5 text-white" />
+        <div className="w-12 h-12 rounded-2xl overflow-hidden bg-white/10 flex items-center justify-center">
+          <img src="/logo.png" alt="Archify logo" className="w-10 h-10 object-contain" />
         </div>
         <div>
           <p className="text-white font-bold text-sm leading-tight">Archify</p>

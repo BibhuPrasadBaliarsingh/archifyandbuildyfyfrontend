@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, DownloadCloud } from 'lucide-react';
 import { PageHeader, DataTable, SearchBar, ConfirmDialog, StatusBadge } from '../../components/ui/index.jsx';
 import api from '../../utils/api.js';
 import toast from 'react-hot-toast';
@@ -9,9 +9,29 @@ export default function EmployeesList() {
   const [employees, setEmployees] = useState([]);
   const [search, setSearch]   = useState('');
   const [busy, setBusy]       = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [delTarget, setDelTarget] = useState(null);
   const [delBusy, setDelBusy]     = useState(false);
   const navigate = useNavigate();
+
+  const downloadExport = async () => {
+    setExporting(true);
+    try {
+      const response = await api.get('/employees/export', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'employees.xls';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error('Export failed');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const load = () => { setBusy(true); api.get('/employees').then(r => setEmployees(r.data)).catch(() => toast.error('Failed to load')).finally(() => setBusy(false)); };
   useEffect(load, []);
@@ -51,7 +71,15 @@ export default function EmployeesList() {
   return (
     <div>
       <PageHeader title="Employees" subtitle={`${filtered.length} employee${filtered.length !== 1 ? 's' : ''}`}
-        actions={<button onClick={() => navigate('/admin/employees/new')} className="btn-primary flex items-center gap-2 text-sm"><Plus className="w-4 h-4" /> Add Employee</button>}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <button onClick={downloadExport} disabled={exporting} className="btn-secondary flex items-center gap-2 text-sm">
+              <DownloadCloud className="w-4 h-4" />
+              {exporting ? 'Exporting…' : 'Export Employees'}
+            </button>
+            <button onClick={() => navigate('/admin/employees/new')} className="btn-primary flex items-center gap-2 text-sm"><Plus className="w-4 h-4" /> Add Employee</button>
+          </div>
+        }
       />
       <div className="card">
         <div className="mb-4"><SearchBar value={search} onChange={setSearch} placeholder="Search employees…" /></div>

@@ -63,7 +63,7 @@ export default function LeadForm() {
   if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" /></div>;
 
   return (
-    <div className="max-w-3xl">
+    <div className="w-full">
       <PageHeader title={isEdit ? 'Edit Lead' : 'New Lead'} subtitle="Lead Management Form" />
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="card space-y-5">
