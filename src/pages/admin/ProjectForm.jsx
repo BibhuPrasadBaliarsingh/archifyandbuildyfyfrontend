@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageHeader, FormField } from '../../components/ui/index.jsx';
 import api from '../../utils/api.js';
+import { normalizePhoneInput } from '../../utils/input.js';
 import toast from 'react-hot-toast';
 
 const TASK_STATUSES = ['Pending', 'In Progress', 'Completed', 'N/A'];
@@ -81,7 +82,16 @@ export default function ProjectForm() {
               <input className="input-field" value={form.clientName} onChange={e => set('clientName', e.target.value)} required />
             </FormField>
             <FormField label="Contact Number" required>
-              <input className="input-field" type="tel" value={form.contactNumber} onChange={e => set('contactNumber', e.target.value)} required />
+              <input
+                className="input-field"
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={10}
+                value={form.contactNumber}
+                onChange={e => set('contactNumber', normalizePhoneInput(e.target.value))}
+                required
+              />
             </FormField>
             <FormField label="Project Type">
               <select className="input-field" value={form.projectType} onChange={e => set('projectType', e.target.value)}>

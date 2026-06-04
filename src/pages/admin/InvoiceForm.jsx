@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { PageHeader, FormField } from '../../components/ui/index.jsx';
 import { Plus, Trash2 } from 'lucide-react';
 import api from '../../utils/api.js';
+import { normalizePhoneInput } from '../../utils/input.js';
 import toast from 'react-hot-toast';
 
 const emptyLine = () => ({ description: '', quantity: 1, rate: 0, amount: 0 });
@@ -211,7 +212,15 @@ export default function InvoiceForm() {
                   <input className="input-field" value={form.clientName} onChange={e => set('clientName', e.target.value)} required />
                 </FormField>
                 <FormField label="Client Contact">
-                  <input className="input-field" value={form.clientContact} onChange={e => set('clientContact', e.target.value)} />
+                  <input
+                    className="input-field"
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={10}
+                    value={form.clientContact}
+                    onChange={e => set('clientContact', normalizePhoneInput(e.target.value))}
+                  />
                 </FormField>
                 <FormField label="Client Address">
                   <input className="input-field" value={form.clientAddress} onChange={e => set('clientAddress', e.target.value)} />

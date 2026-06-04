@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageHeader, FormField } from '../../components/ui/index.jsx';
 import api from '../../utils/api.js';
+import { normalizePhoneInput } from '../../utils/input.js';
 import toast from 'react-hot-toast';
 
 const SERVICES = [
@@ -110,10 +111,29 @@ export default function ClientEntry() {
               <input className="input-field" type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="email@example.com" />
             </FormField>
             <FormField label="Contact Number" required>
-              <input className="input-field" type="tel" value={form.contact_number} onChange={e => set('contact_number', e.target.value)} placeholder="9876543210" required />
+              <input
+                className="input-field"
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={10}
+                value={form.contact_number}
+                onChange={e => set('contact_number', normalizePhoneInput(e.target.value))}
+                placeholder="9876543210"
+                required
+              />
             </FormField>
             <FormField label="WhatsApp Number">
-              <input className="input-field" type="tel" value={form.whatsapp_number} onChange={e => set('whatsapp_number', e.target.value)} placeholder="9876543210" />
+              <input
+                className="input-field"
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={10}
+                value={form.whatsapp_number}
+                onChange={e => set('whatsapp_number', normalizePhoneInput(e.target.value))}
+                placeholder="9876543210"
+              />
             </FormField>
           </div>
 

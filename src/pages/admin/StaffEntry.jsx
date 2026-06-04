@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageHeader, FormField } from '../../components/ui/index.jsx';
 import api from '../../utils/api.js';
+import { normalizePhoneInput } from '../../utils/input.js';
 import toast from 'react-hot-toast';
 
 const DESIGNATIONS = ['Architect','Junior Architect','Interior Designer','Structural Engineer','Site Supervisor','CAD Operator','Office Admin','Accountant'];
@@ -70,7 +71,15 @@ export default function StaffEntry() {
               </select>
             </FormField>
             <FormField label="Contact Number">
-              <input className="input-field" type="tel" value={form.contact} onChange={e => set('contact', e.target.value)} />
+              <input
+                className="input-field"
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={10}
+                value={form.contact}
+                onChange={e => set('contact', normalizePhoneInput(e.target.value))}
+              />
             </FormField>
             <FormField label="Status">
               <select className="input-field" value={form.status} onChange={e => set('status', e.target.value)}>

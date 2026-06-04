@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageHeader, FormField } from '../../components/ui/index.jsx';
 import api from '../../utils/api.js';
+import { normalizePhoneInput } from '../../utils/input.js';
 import toast from 'react-hot-toast';
 
 const DEFAULTS = {
@@ -82,7 +83,15 @@ export default function EmployeeForm() {
               <input className="input-field" type="email" value={form.email} onChange={e => set('email', e.target.value)} />
             </FormField>
             <FormField label="Phone">
-              <input className="input-field" type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} />
+              <input
+                className="input-field"
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={10}
+                value={form.phone}
+                onChange={e => set('phone', normalizePhoneInput(e.target.value))}
+              />
             </FormField>
             <FormField label="Department">
               <select className="input-field" value={form.department} onChange={e => set('department', e.target.value)}>

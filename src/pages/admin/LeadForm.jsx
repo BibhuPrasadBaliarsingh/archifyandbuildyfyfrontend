@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { PageHeader, FormField } from '../../components/ui/index.jsx';
 import { Plus, Trash2 } from 'lucide-react';
 import api from '../../utils/api.js';
+import { normalizePhoneInput } from '../../utils/input.js';
 import toast from 'react-hot-toast';
 
 const SOURCES   = ['Google', 'Facebook', 'Instagram', 'Walk-in', 'Referral', 'JustDial', 'Other'];
@@ -73,7 +74,16 @@ export default function LeadForm() {
               <input className="input-field" value={form.lead_name} onChange={e => set('lead_name', e.target.value)} required />
             </FormField>
             <FormField label="Contact Number" required>
-              <input className="input-field" type="tel" value={form.contact_number} onChange={e => set('contact_number', e.target.value)} required />
+              <input
+                className="input-field"
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={10}
+                value={form.contact_number}
+                onChange={e => set('contact_number', normalizePhoneInput(e.target.value))}
+                required
+              />
             </FormField>
             <FormField label="Email Address">
               <input className="input-field" type="email" value={form.email_address} onChange={e => set('email_address', e.target.value)} />
