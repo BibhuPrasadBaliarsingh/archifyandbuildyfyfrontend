@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: '/api' });
+// In development, `/api` is proxied to the local backend by Vite.
+// In production, set VITE_API_URL to your Render backend URL, e.g.
+// VITE_API_URL=https://archifyandbuildyfybackend.onrender.com/api
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || '/api'
+});
 
 export const getErrorMessage = (err) => {
   if (!err) return 'Unknown error';
