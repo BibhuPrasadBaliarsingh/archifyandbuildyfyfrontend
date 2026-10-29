@@ -28,6 +28,10 @@ export default function StaffEntry() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (form.contact && form.contact.length < 10) {
+      toast.error('Contact number must be at least 10 digits');
+      return;
+    }
     if (!isEdit && !form.password) { toast.error('Password is required'); return; }
     setBusy(true);
     try {
@@ -75,8 +79,11 @@ export default function StaffEntry() {
                 className="input-field"
                 type="tel"
                 inputMode="numeric"
-                pattern="[0-9]*"
+                pattern="[0-9]{10}"
+                minLength={10}
                 maxLength={10}
+                placeholder="10-digit mobile number"
+                title="Please enter a 10-digit contact number"
                 value={form.contact}
                 onChange={e => set('contact', normalizePhoneInput(e.target.value))}
               />

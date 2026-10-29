@@ -50,6 +50,10 @@ export default function LeadForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (form.contact_number && form.contact_number.length < 10) {
+      toast.error('Contact number must be at least 10 digits');
+      return;
+    }
     setBusy(true);
     try {
       const payload = { ...form, follow_ups: form.follow_ups.filter(f => f.follow_up_date || f.note) };
@@ -78,8 +82,11 @@ export default function LeadForm() {
                 className="input-field"
                 type="tel"
                 inputMode="numeric"
-                pattern="[0-9]*"
+                pattern="[0-9]{10}"
+                minLength={10}
                 maxLength={10}
+                placeholder="10-digit mobile number"
+                title="Please enter a 10-digit contact number"
                 value={form.contact_number}
                 onChange={e => set('contact_number', normalizePhoneInput(e.target.value))}
                 required

@@ -60,6 +60,10 @@ export default function ClientEntry() {
       toast.error('Full name and contact number are required');
       return;
     }
+    if (form.contact_number.length < 10) {
+      toast.error('Contact number must be at least 10 digits');
+      return;
+    }
     setBusy(true);
     try {
       const fd = new FormData();
@@ -116,11 +120,13 @@ export default function ClientEntry() {
                 className="input-field"
                 type="tel"
                 inputMode="numeric"
-                pattern="[0-9]*"
+                pattern="[0-9]{10}"
+                minLength={10}
                 maxLength={10}
                 value={form.contact_number}
                 onChange={e => set('contact_number', normalizePhoneInput(e.target.value))}
                 placeholder="9876543210"
+                title="Please enter a 10-digit contact number"
                 required
               />
             </FormField>
@@ -129,11 +135,13 @@ export default function ClientEntry() {
                 className="input-field"
                 type="tel"
                 inputMode="numeric"
-                pattern="[0-9]*"
+                pattern="[0-9]{10}"
+                minLength={10}
                 maxLength={10}
                 value={form.whatsapp_number}
                 onChange={e => set('whatsapp_number', normalizePhoneInput(e.target.value))}
                 placeholder="9876543210"
+                title="Please enter a 10-digit contact number"
               />
             </FormField>
           </div>

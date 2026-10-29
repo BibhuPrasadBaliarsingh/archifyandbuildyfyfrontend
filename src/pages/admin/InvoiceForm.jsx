@@ -8,8 +8,10 @@ import toast from 'react-hot-toast';
 
 const emptyLine = () => ({ description: '', quantity: 1, rate: 0, amount: 0 });
 
+const COMPANY_ADDRESS = 'Mission Chowk, Jyoti Nagar, Sundargarh, Odisha, 770001';
+
 const DEFAULTS = {
-  type: 'Invoice', invoiceNumber: '', address: 'Mission Chowk, Jyoti Nagar, Sundargarh, Odisha, 770001', clientName: '', clientAddress: '', clientContact: '',
+  type: 'Invoice', invoiceNumber: '', address: COMPANY_ADDRESS, clientName: '', clientAddress: '', clientContact: '',
   date: new Date().toISOString().split('T')[0], dueDate: '', quotationDate: '', validDate: '',
   requestedBy: '', presentAddress: '', projectLocation: '', projectType: '', contactNumber: '', preparedBy: '', planType: '',
   area: 0, ground: 0, first: 0, second: 0, third: 0, fourth: 0, fifth: 0, totalArea: 0, unitPrice: 0,
@@ -75,6 +77,7 @@ export default function InvoiceForm() {
         setForm({
           ...DEFAULTS,
           ...d,
+          address: COMPANY_ADDRESS,
           invoiceNumber: d.invoiceNumber || d.invoice_number || '',
           date: d.date ? d.date.split('T')[0] : DEFAULTS.date,
           dueDate: d.dueDate ? d.dueDate.split('T')[0] : '',
@@ -128,6 +131,11 @@ export default function InvoiceForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const contactVal = form.type === 'Quotation' ? form.contactNumber : form.clientContact;
+    if (contactVal && contactVal.trim().length > 0 && contactVal.trim().length < 10) {
+      toast.error('Contact number must be at least 10 digits');
+      return;
+    }
     setBusy(true);
     try {
       const computedStatus = form.type === 'Quotation'
@@ -140,6 +148,7 @@ export default function InvoiceForm() {
 
       const payload = {
         ...form,
+        address: COMPANY_ADDRESS,
         status: computedStatus,
         invoiceNumber: form.invoiceNumber || generatedNumber,
         subTotal: displaySubTotal,
@@ -153,6 +162,9 @@ export default function InvoiceForm() {
         payload.date = undefined;
         payload.dueDate = undefined;
       } else {
+        const floorTotal = fmt(form.ground) + fmt(form.first) + fmt(form.second) + fmt(form.third);
+        payload.totalArea = fmt(form.area) || floorTotal;
+        payload.area = payload.totalArea;
         payload.quotationDate = undefined;
         payload.validDate = undefined;
       }
@@ -208,13 +220,11 @@ export default function InvoiceForm() {
               />
             </FormField>
             <FormField label="Address">
-              <select className="input-field" value={form.address} onChange={e => set('address', e.target.value)}>
-                <option value="">Select address</option>
-                <option value="Mission Chowk, Jyoti Nagar, Sundargarh, Odisha, 770001">Mission Chowk, Jyoti Nagar, Sundargarh, Odisha, 770001</option>
-                {form.address && form.address !== 'Mission Chowk, Jyoti Nagar, Sundargarh, Odisha, 770001' && (
-                  <option value={form.address}>{form.address}</option>
-                )}
-              </select>
+              <input
+                className="input-field bg-gray-50 text-gray-700"
+                readOnly
+                value={COMPANY_ADDRESS}
+              />
             </FormField>
             {form.type === 'Quotation' ? (
               <>
@@ -236,7 +246,18 @@ export default function InvoiceForm() {
                   </select>
                 </FormField>
                 <FormField label="Contact Number">
-                  <input className="input-field" value={form.contactNumber} onChange={e => set('contactNumber', e.target.value)} />
+                  <input
+                    className="input-field"
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]{10}"
+                    minLength={10}
+                    maxLength={10}
+                    placeholder="10-digit mobile number"
+                    title="Please enter a 10-digit contact number"
+                    value={form.contactNumber}
+                    onChange={e => set('contactNumber', normalizePhoneInput(e.target.value))}
+                  />
                 </FormField>
                 <FormField label="Prepared By">
                   <input className="input-field" value={form.preparedBy} onChange={e => set('preparedBy', e.target.value)} />
@@ -252,8 +273,11 @@ export default function InvoiceForm() {
                     className="input-field"
                     type="tel"
                     inputMode="numeric"
-                    pattern="[0-9]*"
+                    pattern="[0-9]{10}"
+                    minLength={10}
                     maxLength={10}
+                    placeholder="10-digit mobile number"
+                    title="Please enter a 10-digit contact number"
                     value={form.clientContact}
                     onChange={e => set('clientContact', normalizePhoneInput(e.target.value))}
                   />
@@ -288,22 +312,22 @@ export default function InvoiceForm() {
                   )}
                 </select>
               </FormField>
-              <FormField label="Ground Floor">
+              <FormField label="Ground Floor (square/ft)">
                 <input className="input-field" type="number" min="0" value={form.ground} onChange={e => set('ground', e.target.value)} />
               </FormField>
-              <FormField label="First Floor">
+              <FormField label="First Floor (square/ft)">
                 <input className="input-field" type="number" min="0" value={form.first} onChange={e => set('first', e.target.value)} />
               </FormField>
-              <FormField label="Second Floor">
+              <FormField label="Second Floor (square/ft)">
                 <input className="input-field" type="number" min="0" value={form.second} onChange={e => set('second', e.target.value)} />
               </FormField>
-              <FormField label="Third Floor">
+              <FormField label="Third Floor (square/ft)">
                 <input className="input-field" type="number" min="0" value={form.third} onChange={e => set('third', e.target.value)} />
               </FormField>
-              <FormField label="Fourth Floor">
+              <FormField label="Fourth Floor (square/ft)">
                 <input className="input-field" type="number" min="0" value={form.fourth} onChange={e => set('fourth', e.target.value)} />
               </FormField>
-              <FormField label="Fifth Floor">
+              <FormField label="Fifth Floor (square/ft)">
                 <input className="input-field" type="number" min="0" value={form.fifth} onChange={e => set('fifth', e.target.value)} />
               </FormField>
             </div>
@@ -335,6 +359,58 @@ export default function InvoiceForm() {
               </FormField>
               <FormField label="Description">
                 <textarea className="input-field" rows={3} value={form.description} onChange={e => set('description', e.target.value)} />
+              </FormField>
+              <FormField label="Ground Floor (square/ft)">
+                <input
+                  className="input-field"
+                  type="number"
+                  min="0"
+                  value={form.ground || ''}
+                  onChange={e => {
+                    const g = e.target.value;
+                    const tot = fmt(g) + fmt(form.first) + fmt(form.second) + fmt(form.third) + fmt(form.fourth) + fmt(form.fifth);
+                    setForm(prev => ({ ...prev, ground: g, ...(tot > 0 ? { area: tot } : {}) }));
+                  }}
+                />
+              </FormField>
+              <FormField label="First Floor (square/ft)">
+                <input
+                  className="input-field"
+                  type="number"
+                  min="0"
+                  value={form.first || ''}
+                  onChange={e => {
+                    const f = e.target.value;
+                    const tot = fmt(form.ground) + fmt(f) + fmt(form.second) + fmt(form.third) + fmt(form.fourth) + fmt(form.fifth);
+                    setForm(prev => ({ ...prev, first: f, ...(tot > 0 ? { area: tot } : {}) }));
+                  }}
+                />
+              </FormField>
+              <FormField label="Second Floor (square/ft)">
+                <input
+                  className="input-field"
+                  type="number"
+                  min="0"
+                  value={form.second || ''}
+                  onChange={e => {
+                    const s = e.target.value;
+                    const tot = fmt(form.ground) + fmt(form.first) + fmt(s) + fmt(form.third) + fmt(form.fourth) + fmt(form.fifth);
+                    setForm(prev => ({ ...prev, second: s, ...(tot > 0 ? { area: tot } : {}) }));
+                  }}
+                />
+              </FormField>
+              <FormField label="Third Floor (square/ft)">
+                <input
+                  className="input-field"
+                  type="number"
+                  min="0"
+                  value={form.third || ''}
+                  onChange={e => {
+                    const t = e.target.value;
+                    const tot = fmt(form.ground) + fmt(form.first) + fmt(form.second) + fmt(t) + fmt(form.fourth) + fmt(form.fifth);
+                    setForm(prev => ({ ...prev, third: t, ...(tot > 0 ? { area: tot } : {}) }));
+                  }}
+                />
               </FormField>
               <FormField label="Area (square/ft)">
                 <input className="input-field" type="number" min="0" value={form.area || ''} onChange={e => set('area', e.target.value)} />
