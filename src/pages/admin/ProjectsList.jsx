@@ -9,7 +9,7 @@ import { format } from 'date-fns';
 const TASKS = ['twoDPlan','threeDElevation','interiorDesign','planApproved','structureDetailing','threeDElevationDetailing','landscapeDesigning','constructionDrawing'];
 const TASK_LABELS = { twoDPlan:'2D', threeDElevation:'3D', interiorDesign:'Int', planApproved:'Plan', structureDetailing:'Struct', threeDElevationDetailing:'3D Det', landscapeDesigning:'Land', constructionDrawing:'Const' };
 
-const statusColor = { Completed: 'bg-green-500', 'In Progress': 'bg-blue-500', Pending: 'bg-yellow-400', 'N/A': 'bg-gray-300' };
+const statusColor = { Completed: 'bg-green-500', 'In Progress': 'bg-blue-500', Pending: 'bg-yellow-400' };
 
 export default function ProjectsList() {
   const [projects, setProjects] = useState([]);
@@ -61,16 +61,23 @@ export default function ProjectsList() {
     { key: 'contactNumber', label: 'Contact' },
     { key: 'projectType',   label: 'Type' },
     { key: 'projectLocation', label: 'Location' },
-    { key: 'tasks',         label: 'Tasks',          render: r => (
-        <div className="flex gap-0.5 flex-wrap">
-          {TASKS.map(t => (
-            <span key={t} title={`${TASK_LABELS[t]}: ${r[t]?.status || 'N/A'}`}
-              className={`w-5 h-5 rounded text-[8px] font-bold text-white flex items-center justify-center ${statusColor[r[t]?.status] || 'bg-gray-200'}`}>
-              {TASK_LABELS[t][0]}
-            </span>
-          ))}
-        </div>
-      )
+    { key: 'tasks',         label: 'Tasks',          render: r => {
+        const activeTasks = TASKS.filter(t => r[t] && r[t].status && r[t].status !== 'N/A');
+        if (activeTasks.length === 0) return <span className="text-gray-400 text-xs">—</span>;
+        return (
+          <div className="flex gap-1 flex-wrap items-center">
+            {activeTasks.map(t => (
+              <span
+                key={t}
+                title={`${TASK_LABELS[t]}: ${r[t]?.status || 'Pending'}${r[t]?.architect ? ` (${r[t].architect})` : ''}`}
+                className={`w-5 h-5 rounded text-[8px] font-bold text-white flex items-center justify-center ${statusColor[r[t]?.status] || 'bg-yellow-400'}`}
+              >
+                {TASK_LABELS[t][0]}
+              </span>
+            ))}
+          </div>
+        );
+      }
     },
     { key: 'overallStatus', label: 'Status',         render: r => <StatusBadge status={r.overallStatus ?? 'N/A'} /> },
     { key: 'actions',       label: 'Actions',        render: r => (
