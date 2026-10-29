@@ -77,7 +77,7 @@ export default function AdminLayout() {
   };
 
   const Sidebar = () => (
-    <aside className="flex flex-col h-full bg-brand-900 w-64 shrink-0">
+    <aside className="flex flex-col h-full bg-brand-900 w-64 shrink-0 no-print">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10">
         <div className="w-12 h-12 rounded-2xl overflow-hidden bg-white/10 flex items-center justify-center">
@@ -143,15 +143,15 @@ export default function AdminLayout() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-gray-50 print:h-auto print:overflow-visible print:bg-white print:block">
       {/* Desktop sidebar */}
-      <div className="hidden lg:flex">
+      <div className="hidden lg:flex no-print print:hidden">
         <Sidebar />
       </div>
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
+        <div className="lg:hidden fixed inset-0 z-50 flex no-print print:hidden">
           <div className="fixed inset-0 bg-black/60" onClick={() => setSidebarOpen(false)} />
           <div className="relative flex">
             <Sidebar />
@@ -166,9 +166,9 @@ export default function AdminLayout() {
       )}
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden print:overflow-visible print:block">
         {/* Top header */}
-        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center gap-4 shrink-0">
+        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center gap-4 shrink-0 no-print print:hidden">
           <button
             className="lg:hidden text-gray-500 hover:text-gray-700"
             onClick={() => setSidebarOpen(true)}
@@ -191,7 +191,7 @@ export default function AdminLayout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 print:p-0 print:m-0 print:overflow-visible print:block">
           <Outlet />
         </main>
       </div>

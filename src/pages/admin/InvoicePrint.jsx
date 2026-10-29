@@ -55,6 +55,7 @@ export default function InvoicePrint() {
   const name = getFirstDefined(invoice, 'clientName', 'client_name', 'requestedBy', 'requested_by');
   const addressValue = getFirstDefined(invoice, 'address', 'clientAddress', 'client_address', 'presentAddress', 'present_address');
   const contact = getFirstDefined(invoice, 'clientContact', 'client_contact', 'contactNumber', 'contact_number');
+  const projectType = getFirstDefined(invoice, 'projectType', 'project_type');
   const paymentMode = getFirstDefined(invoice, 'paymentMode', 'payment_mode');
   const paymentAmount = invoice.amountPaid || invoice.total || invoice.grand_total || 0;
   const amountInWords = `${numberToWords(Math.floor(paymentAmount))}${paymentAmount % 1 ? ` and ${numberToWords(Math.round((paymentAmount % 1) * 100))} paise` : ''}`;
@@ -68,8 +69,8 @@ export default function InvoicePrint() {
   }];
 
   return (
-    <div className="max-w-5xl mx-auto py-6 px-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 no-print">
+    <div className="max-w-5xl mx-auto py-6 px-4 print:p-0 print:m-0 print:max-w-none">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 no-print print:hidden">
         <button onClick={() => navigate('/admin/invoices')} className="btn-secondary inline-flex items-center gap-2">
           <ArrowLeft className="w-4 h-4" /> Back to invoices
         </button>
@@ -79,11 +80,37 @@ export default function InvoicePrint() {
       </div>
 
       <style>{`
-        @page { size: A4; margin: 12mm; }
+        @page { size: A4; margin: 8mm; }
         @media print {
-          body { margin: 0; }
-          .no-print { display: none !important; }
-          .print-card { box-shadow: none !important; }
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #fff !important;
+            height: auto !important;
+            overflow: visible !important;
+          }
+          header, aside, nav, .no-print, [role="navigation"] {
+            display: none !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            visibility: hidden !important;
+          }
+          main {
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: visible !important;
+          }
+          .print-card {
+            box-shadow: none !important;
+            border: 1px solid #000 !important;
+          }
+          .print-document {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 12px !important;
+          }
         }
         .print-document { max-width: 920px; margin: 0 auto; }
         .invoice-header-text { line-height: 1.05; }
@@ -103,7 +130,7 @@ export default function InvoicePrint() {
               <div className="invoice-header-text pt-2">
                 <div className="text-[11px] uppercase tracking-wide">State: Odisha,State Code: 21</div>
                 <div className="text-3xl font-bold uppercase">ARCHIFY & BUILDIFY CONSTRUCTIONS PVT. LTD.</div>
-                <div className="text-sm">Raj Nivas,G.A. 432,B1,Second floor,near DAV School,Kalinga Nagar,Bhubaneswar,Odisha 751003</div>
+                <div className="text-sm">Mission Chowk, Jyoti Nagar, Sundargarh, Odisha, 770001</div>
                 <div className="text-sm">Contact no.: 9078036899</div>
               </div>
             </div>
@@ -124,6 +151,7 @@ export default function InvoicePrint() {
             <div>Name :{name}</div>
             <div>Address :{addressValue}</div>
             <div>Contact Number :{contact}</div>
+            {projectType !== '—' && <div>Project Type :{projectType}</div>}
           </div>
           <div className="text-right md:text-right label-value">
             <div>Date :{formattedDate}</div>

@@ -9,6 +9,7 @@ const SERVICES = [
   'House Plan as per Vaastu', '3D Visualization', 'Construction',
   'Interior Designing', 'Modular Kitchen', 'Building Plan Approval',
   'Structural Designing', 'Landscape Designing', 'Renovation', 'House Loan',
+  'Other',
 ];
 
 const DEFAULTS = {

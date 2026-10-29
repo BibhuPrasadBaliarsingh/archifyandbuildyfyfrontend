@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 const emptyLine = () => ({ description: '', quantity: 1, rate: 0, amount: 0 });
 
 const DEFAULTS = {
-  type: 'Invoice', invoiceNumber: '', address: '', clientName: '', clientAddress: '', clientContact: '',
+  type: 'Invoice', invoiceNumber: '', address: 'Mission Chowk, Jyoti Nagar, Sundargarh, Odisha, 770001', clientName: '', clientAddress: '', clientContact: '',
   date: new Date().toISOString().split('T')[0], dueDate: '', quotationDate: '', validDate: '',
   requestedBy: '', presentAddress: '', projectLocation: '', projectType: '', contactNumber: '', preparedBy: '', planType: '',
   area: 0, ground: 0, first: 0, second: 0, third: 0, fourth: 0, fifth: 0, totalArea: 0, unitPrice: 0,
@@ -27,6 +27,35 @@ const QUOTATION_OPTIONS = [
   'Interior Design',
   'Landscaping',
   'Building Plan Approval',
+];
+
+const PROJECT_TYPES = [
+  'Residential',
+  'Commercial',
+  'Industrial',
+  'Renovation',
+  'Interior Design',
+  '2D (Two Dimensional) plan',
+  '3D (Three Dimensional) Elevation',
+  'Landscaping',
+  'Building Plan Approval',
+  'Other',
+];
+
+const PLAN_TYPES = [
+  '2D (Two Dimensional) plan',
+  'House Plan as per Vaastu',
+  'Floor Plan',
+  'Structural Plan',
+  'Building Plan Approval',
+  '3D (Three Dimensional) Elevation',
+  'Interior Layout',
+  'Landscape Plan',
+  'Electrical & Plumbing Plan',
+  'Working Drawing',
+  'Residential Plan',
+  'Commercial Plan',
+  'Other',
 ];
 
 export default function InvoiceForm() {
@@ -101,8 +130,17 @@ export default function InvoiceForm() {
     e.preventDefault();
     setBusy(true);
     try {
+      const computedStatus = form.type === 'Quotation'
+        ? 'Unpaid'
+        : (displayTotal > 0 && fmt(form.amountPaid) >= displayTotal
+            ? 'Paid'
+            : fmt(form.amountPaid) > 0
+              ? 'Partial'
+              : 'Unpaid');
+
       const payload = {
         ...form,
+        status: computedStatus,
         invoiceNumber: form.invoiceNumber || generatedNumber,
         subTotal: displaySubTotal,
         total: displayTotal,
@@ -170,15 +208,13 @@ export default function InvoiceForm() {
               />
             </FormField>
             <FormField label="Address">
-              {form.type === 'Quotation' ? (
-                <select className="input-field" value={form.address} onChange={e => set('address', e.target.value)}>
-                  <option value="">Select address</option>
-                  <option value="Raj Nivas,G.A. 432,B1,Second floor,near DAV School,Kalinga Nagar,Bhubaneswar,Odisha 751003">Raj Nivas,G.A. 432,B1,Second floor,near DAV School,Kalinga Nagar,Bhubaneswar,Odisha 751003</option>
-                  <option value="Mission Chowk, Jyoti Nagar, Sundargarh, Odisha, 770001">Mission Chowk, Jyoti Nagar, Sundargarh, Odisha, 770001</option>
-                </select>
-              ) : (
-                <input className="input-field" value={form.address} onChange={e => set('address', e.target.value)} />
-              )}
+              <select className="input-field" value={form.address} onChange={e => set('address', e.target.value)}>
+                <option value="">Select address</option>
+                <option value="Mission Chowk, Jyoti Nagar, Sundargarh, Odisha, 770001">Mission Chowk, Jyoti Nagar, Sundargarh, Odisha, 770001</option>
+                {form.address && form.address !== 'Mission Chowk, Jyoti Nagar, Sundargarh, Odisha, 770001' && (
+                  <option value={form.address}>{form.address}</option>
+                )}
+              </select>
             </FormField>
             {form.type === 'Quotation' ? (
               <>
@@ -242,29 +278,37 @@ export default function InvoiceForm() {
                 </select>
               </FormField>
               <FormField label="Plan Type">
-                <input className="input-field" value={form.planType} onChange={e => set('planType', e.target.value)} />
+                <select className="input-field" value={form.planType} onChange={e => set('planType', e.target.value)}>
+                  <option value="">Select Plan Type</option>
+                  {PLAN_TYPES.map(option => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                  {form.planType && !PLAN_TYPES.includes(form.planType) && (
+                    <option value={form.planType}>{form.planType}</option>
+                  )}
+                </select>
               </FormField>
-              <FormField label="Ground">
+              <FormField label="Ground Floor">
                 <input className="input-field" type="number" min="0" value={form.ground} onChange={e => set('ground', e.target.value)} />
               </FormField>
-              <FormField label="First">
+              <FormField label="First Floor">
                 <input className="input-field" type="number" min="0" value={form.first} onChange={e => set('first', e.target.value)} />
               </FormField>
-              <FormField label="Second">
+              <FormField label="Second Floor">
                 <input className="input-field" type="number" min="0" value={form.second} onChange={e => set('second', e.target.value)} />
               </FormField>
-              <FormField label="Third">
+              <FormField label="Third Floor">
                 <input className="input-field" type="number" min="0" value={form.third} onChange={e => set('third', e.target.value)} />
               </FormField>
-              <FormField label="Fourth">
+              <FormField label="Fourth Floor">
                 <input className="input-field" type="number" min="0" value={form.fourth} onChange={e => set('fourth', e.target.value)} />
               </FormField>
-              <FormField label="Fifth">
+              <FormField label="Fifth Floor">
                 <input className="input-field" type="number" min="0" value={form.fifth} onChange={e => set('fifth', e.target.value)} />
               </FormField>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-              <FormField label="Total Area">
+              <FormField label="Total Area (square/ft)">
                 <input className="input-field bg-gray-50" readOnly value={quotationTotalArea} />
               </FormField>
               <FormField label="Unit Price (₹)">
@@ -278,10 +322,21 @@ export default function InvoiceForm() {
         ) : (
           <div className="card space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <FormField label="Project Type">
+                <select className="input-field" value={form.projectType} onChange={e => set('projectType', e.target.value)}>
+                  <option value="">Select project type</option>
+                  {PROJECT_TYPES.map(option => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                  {form.projectType && !PROJECT_TYPES.includes(form.projectType) && (
+                    <option value={form.projectType}>{form.projectType}</option>
+                  )}
+                </select>
+              </FormField>
               <FormField label="Description">
                 <textarea className="input-field" rows={3} value={form.description} onChange={e => set('description', e.target.value)} />
               </FormField>
-              <FormField label="Area">
+              <FormField label="Area (square/ft)">
                 <input className="input-field" type="number" min="0" value={form.area || ''} onChange={e => set('area', e.target.value)} />
               </FormField>
               <FormField label="Unit Price (₹)">
@@ -367,19 +422,6 @@ export default function InvoiceForm() {
             </div>
           </div>
         )}
-
-        <div className="card space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <FormField label="Payment Status">
-              <select className="input-field" value={form.status} onChange={e => set('status', e.target.value)}>
-                <option>Unpaid</option><option>Partial</option><option>Paid</option>
-              </select>
-            </FormField>
-          </div>
-          <FormField label="Notes / Terms & Conditions">
-            <textarea className="input-field" rows={3} value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Payment terms, notes…" />
-          </FormField>
-        </div>
 
         <div className="flex gap-3">
           <button type="submit" disabled={busy} className="btn-primary">{busy ? 'Saving…' : isEdit ? 'Update' : `Create ${form.type}`}</button>

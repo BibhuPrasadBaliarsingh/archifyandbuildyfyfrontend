@@ -35,3 +35,14 @@
 ::-webkit-scrollbar-track { @apply bg-gray-100; }
 ::-webkit-scrollbar-thumb { @apply bg-gray-300 rounded-full; }
 ::-webkit-scrollbar-thumb:hover { @apply bg-gray-400; }
+
+@media print {
+  header, aside, nav, .no-print {
+    display: none !important;
+  }
+  body, html {
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
