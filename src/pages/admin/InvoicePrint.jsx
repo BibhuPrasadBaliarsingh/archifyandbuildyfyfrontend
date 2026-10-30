@@ -180,7 +180,19 @@ const STANDARD_SERVICES = [
 ];
 
 const resolveInvoiceTableRows = (invoice) => {
+  const g = invoice.ground ? Number(invoice.ground) : '';
+  const f = invoice.first ? Number(invoice.first) : '';
+  const s = invoice.second ? Number(invoice.second) : '';
+  const t = invoice.third ? Number(invoice.third) : '';
+
   const lineItems = Array.isArray(invoice.lineItems) ? invoice.lineItems : [];
+  const validLineItems = lineItems.filter(item =>
+    (item.description && item.description.trim()) ||
+    Number(item.amount) > 0 ||
+    Number(item.rate) > 0 ||
+    Number(item.quantity) > 0
+  );
+
   const rows = STANDARD_SERVICES.map(serviceName => ({
     name: serviceName,
     ground: '',
@@ -192,8 +204,8 @@ const resolveInvoiceTableRows = (invoice) => {
     amount: 0,
   }));
 
-  if (lineItems.length > 0) {
-    lineItems.forEach(item => {
+  if (validLineItems.length > 0) {
+    validLineItems.forEach(item => {
       const desc = (item.description || '').toLowerCase();
       let matchedIndex = -1;
       if (desc.includes('residential') || (desc.includes('2d') && !desc.includes('commercial'))) {
@@ -222,13 +234,19 @@ const resolveInvoiceTableRows = (invoice) => {
         rows[matchedIndex].totalArea = itemQty || rows[matchedIndex].totalArea;
         rows[matchedIndex].unitPrice = itemRate || rows[matchedIndex].unitPrice;
         rows[matchedIndex].amount = itemAmt;
+        if (g || f || s || t) {
+          rows[matchedIndex].ground = item.ground || g || '';
+          rows[matchedIndex].first = item.first || f || '';
+          rows[matchedIndex].second = item.second || s || '';
+          rows[matchedIndex].third = item.third || t || '';
+        }
       } else {
         rows.push({
           name: item.description || 'Custom Service',
-          ground: '',
-          first: '',
-          second: '',
-          third: '',
+          ground: item.ground || g || '',
+          first: item.first || f || '',
+          second: item.second || s || '',
+          third: item.third || t || '',
           totalArea: itemQty,
           unitPrice: itemRate,
           amount: itemAmt,
@@ -237,8 +255,9 @@ const resolveInvoiceTableRows = (invoice) => {
     });
   } else {
     const desc = (invoice.description || invoice.projectType || '').toLowerCase();
-    let targetIndex = 0;
-    if (desc.includes('commercial')) targetIndex = 1;
+    let targetIndex = -1;
+    if (desc.includes('residential') || (desc.includes('2d') && !desc.includes('commercial'))) targetIndex = 0;
+    else if (desc.includes('commercial')) targetIndex = 1;
     else if (desc.includes('3d') || desc.includes('elevation')) targetIndex = 2;
     else if (desc.includes('interior')) targetIndex = 3;
     else if (desc.includes('approval') || desc.includes('documentation')) targetIndex = 4;
@@ -250,25 +269,47 @@ const resolveInvoiceTableRows = (invoice) => {
     const qty = Number(invoice.total_area || invoice.totalArea || invoice.area || 0);
     const rate = Number(invoice.unitPrice || invoice.unit_price || 0);
 
-    rows[targetIndex].totalArea = qty || '';
-    rows[targetIndex].unitPrice = rate || '';
-    rows[targetIndex].amount = amt;
+    if (targetIndex !== -1) {
+      rows[targetIndex].totalArea = qty || '';
+      rows[targetIndex].unitPrice = rate || '';
+      rows[targetIndex].amount = amt;
+      rows[targetIndex].ground = g || '';
+      rows[targetIndex].first = f || '';
+      rows[targetIndex].second = s || '';
+      rows[targetIndex].third = t || '';
+    } else {
+      const customName = invoice.description || invoice.projectType || 'Custom Service';
+      rows.push({
+        name: customName,
+        ground: g || '',
+        first: f || '',
+        second: s || '',
+        third: t || '',
+        totalArea: qty || '',
+        unitPrice: rate || '',
+        amount: amt,
+      });
+    }
   }
 
-  const g = invoice.ground || '';
-  const f = invoice.first || '';
-  const s = invoice.second || '';
-  const t = invoice.third || '';
-
+  // Ensure any row with amount or totalArea has the floor values populated if entered
   if (g || f || s || t) {
-    [0, 2].forEach(idx => {
-      if (rows[idx] && (rows[idx].amount > 0 || rows[idx].totalArea)) {
-        rows[idx].ground = g;
-        rows[idx].first = f;
-        rows[idx].second = s;
-        rows[idx].third = t;
+    let assigned = false;
+    rows.forEach(r => {
+      if (Number(r.amount) > 0 || r.totalArea) {
+        if (!r.ground && g) r.ground = g;
+        if (!r.first && f) r.first = f;
+        if (!r.second && s) r.second = s;
+        if (!r.third && t) r.third = t;
+        assigned = true;
       }
     });
+    if (!assigned && rows.length > 0) {
+      rows[0].ground = g || '';
+      rows[0].first = f || '';
+      rows[0].second = s || '';
+      rows[0].third = t || '';
+    }
   }
 
   return rows;

@@ -60,6 +60,17 @@ const PLAN_TYPES = [
   'Other',
 ];
 
+const INVOICE_SERVICES = [
+  '2D ( Floor Plan Residential )',
+  '2D ( Floor Plan Commercial )',
+  '3D Elevation',
+  'Interior Design',
+  'Building Plan Approval & Documentation',
+  'Additional Floor Approval',
+  'Layout Charges',
+  'Site Visit Charges',
+];
+
 export default function InvoiceForm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -358,7 +369,18 @@ export default function InvoiceForm() {
                 </select>
               </FormField>
               <FormField label="Description">
-                <textarea className="input-field" rows={3} value={form.description} onChange={e => set('description', e.target.value)} />
+                <input
+                  list="invoice-services-list"
+                  className="input-field"
+                  value={form.description}
+                  onChange={e => set('description', e.target.value)}
+                  placeholder="Select or enter service description"
+                />
+                <datalist id="invoice-services-list">
+                  {INVOICE_SERVICES.map(s => (
+                    <option key={s} value={s} />
+                  ))}
+                </datalist>
               </FormField>
               <FormField label="Ground Floor (square/ft)">
                 <input
@@ -449,7 +471,13 @@ export default function InvoiceForm() {
                   {form.lineItems.map((line, i) => (
                     <tr key={i}>
                       <td className="py-2 px-2">
-                        <input className="input-field" value={line.description} onChange={e => setLine(i, 'description', e.target.value)} placeholder="Service or item description" />
+                        <input
+                          list="invoice-services-list"
+                          className="input-field"
+                          value={line.description}
+                          onChange={e => setLine(i, 'description', e.target.value)}
+                          placeholder="Service or item description"
+                        />
                       </td>
                       <td className="py-2 px-2">
                         <input className="input-field" type="number" min="1" value={line.quantity} onChange={e => setLine(i, 'quantity', e.target.value)} />
