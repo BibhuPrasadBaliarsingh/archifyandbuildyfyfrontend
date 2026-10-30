@@ -123,6 +123,23 @@ export default function InvoiceForm() {
   const addLine = () => setForm(prev => ({ ...prev, lineItems: [...prev.lineItems, emptyLine()] }));
   const removeLine = (index) => setForm(prev => ({ ...prev, lineItems: prev.lineItems.filter((_, idx) => idx !== index) }));
 
+  const addQuickService = (serviceName) => {
+    const floorTotal = fmt(form.ground) + fmt(form.first) + fmt(form.second) + fmt(form.third);
+    const isApprovalOrLayout = serviceName.includes('Approval') || serviceName.includes('Layout') || serviceName.includes('Site Visit');
+    const qty = isApprovalOrLayout ? 1 : (fmt(form.area) || floorTotal || 1);
+    setForm(prev => {
+      const items = [...prev.lineItems];
+      const isFirstEmpty = items.length === 1 && !items[0].description && fmt(items[0].amount) === 0;
+      const newLine = { description: serviceName, quantity: qty, rate: 0, amount: 0 };
+      if (isFirstEmpty) {
+        items[0] = newLine;
+      } else {
+        items.push(newLine);
+      }
+      return { ...prev, lineItems: items };
+    });
+  };
+
   const hasLineItems = form.type !== 'Quotation' && form.lineItems.some(line => fmt(line.amount) > 0);
   const lineSubTotal = form.lineItems.reduce((sum, line) => sum + fmt(line.amount), 0);
   const lineTotal = lineSubTotal + fmt(form.tax);
@@ -454,8 +471,28 @@ export default function InvoiceForm() {
         )}
 
         {form.type !== 'Quotation' && (
-          <div className="card">
-            <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide mb-4">Line Items</h3>
+          <div className="card space-y-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 border-b border-gray-100 pb-3">
+              <div>
+                <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Line Items &amp; Services</h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Add items below to set the amounts for 2D, 3D, Elevation, Approval, etc. on the printed invoice.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-1.5 items-center">
+                <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mr-1">Quick Add:</span>
+                {INVOICE_SERVICES.map(serviceName => (
+                  <button
+                    key={serviceName}
+                    type="button"
+                    onClick={() => addQuickService(serviceName)}
+                    className="text-xs px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium transition-colors border border-blue-200"
+                  >
+                    + {serviceName.replace(/\s*\(.*?\)\s*/g, '')}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
