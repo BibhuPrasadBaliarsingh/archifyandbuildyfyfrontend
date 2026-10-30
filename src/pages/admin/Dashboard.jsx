@@ -31,6 +31,14 @@ export default function AdminDashboard() {
 
   const { counts = {}, charts = {} } = data || {};
 
+  const serviceChartData = (charts.clientsByService || [])
+    .map(d => ({ name: d._id || 'Other', value: d.count }))
+    .sort((a, b) => {
+      if (a.name === 'Other') return 1;
+      if (b.name === 'Other') return -1;
+      return 0;
+    });
+
   return (
     <div className="space-y-6">
       <PageHeader title="Dashboard" subtitle="Welcome back! Here's your business overview." />
@@ -49,13 +57,13 @@ export default function AdminDashboard() {
         {/* Clients by Service */}
         <div className="card">
           <h3 className="font-semibold text-gray-800 mb-4">Clients by Service</h3>
-          {charts.clientsByService?.length ? (
+          {serviceChartData.length ? (
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
-                <Pie data={charts.clientsByService.map(d => ({ name: d._id || 'Other', value: d.count }))}
+                <Pie data={serviceChartData}
                   dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} innerRadius={50}
                   paddingAngle={3}>
-                  {charts.clientsByService.map((_, i) => (
+                  {serviceChartData.map((_, i) => (
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>
